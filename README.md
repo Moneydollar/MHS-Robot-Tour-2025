@@ -6,4 +6,4 @@
 - [x] Implement turn logic
 - [x] GUI???
     - [Panning?]
-- [] Compile to binary?
+- Compile to binary?
