@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout,
                            QGraphicsProxyWidget, QMessageBox, QComboBox, QDialog, QTextBrowser)
 from PyQt5.QtCore import Qt, QRectF, QPointF, QUrl
 from PyQt5.QtGui import QPainter, QColor, QPen, QBrush
+
 DARK_THEME = {
     'background': '#1e1e1e',
     'secondary_bg': '#252526',
@@ -301,6 +302,7 @@ class ScratchApp(QWidget):
         """)
         right_panel.addWidget(self.output_label)
         
+        command_output_layout = QHBoxLayout()
         self.command_output = QLabel()
         self.command_output.setStyleSheet(f"""
             QLabel {{
@@ -314,8 +316,29 @@ class ScratchApp(QWidget):
             }}
         """)
         self.command_output.setWordWrap(True)
-        right_panel.addWidget(self.command_output)
         
+        self.copy_button = QPushButton("Copy Code")
+        self.copy_button.setStyleSheet("""
+            QPushButton {
+                background-color: #2196F3;
+                color: white;
+                font-size: 14px;
+                padding: 8px;
+                border-radius: 4px;
+                margin: 5px;
+            }
+            QPushButton:hover {
+                background-color: #1976D2;
+            }
+        """)
+        self.copy_button.clicked.connect(self.copy_generated_code)
+        self.copy_button.setEnabled(False)  # Initially disabled
+        
+        command_output_layout.addWidget(self.command_output)
+        command_output_layout.addWidget(self.copy_button)
+        
+        right_panel.addLayout(command_output_layout)
+
         generate_button = QPushButton("Generate Arduino Code")
         generate_button.setStyleSheet("""
             QPushButton {
@@ -427,10 +450,18 @@ class ScratchApp(QWidget):
             code += "\n  while(1); // Halt the program\n}"
             
             self.command_output.setText(code)
+            self.copy_button.setEnabled(True)  # Enable copy button when code is generated
             
         except ValueError as e:
             QMessageBox.warning(self, "Error", 
                               "Please enter valid numerical values for all commands.")
+
+    def copy_generated_code(self):
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self.command_output.text())
+        
+        # Optional: Show a temporary tooltip or message
+        QMessageBox.information(self, "Copied", "Arduino code copied to clipboard!")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
